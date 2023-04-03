@@ -10,14 +10,15 @@ namespace Ex3v\FormErrorsBundle\Twig;
 
 use Symfony\Component\Form\Form;
 use Ex3v\FormErrorsBundle\Services\FormErrorsParser;
-use Symfony\Component\Translation\TranslatorInterface as Translator;
+use Twig\Extension\AbstractExtension as TwigAbstractExtension;
+use Twig\TwigFunction;
 
-class FormErrorsExtension extends \Twig_Extension
+class FormErrorsExtension extends TwigAbstractExtension
 {
 
     /**
      *
-     * @var \Ex3v\FormErrorsBundle\Services\FormErrorsParser
+     * @var FormErrorsParser
      */
     private $parser;
 
@@ -29,7 +30,7 @@ class FormErrorsExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('all_form_errors', array($this, 'allFormErrors'), array("is_safe" => array("html")))
+            new TwigFunction('all_form_errors', array($this, 'allFormErrors'), array("is_safe" => array("html")))
         );
     }
 
@@ -37,9 +38,9 @@ class FormErrorsExtension extends \Twig_Extension
      * Main Twig extension. Call this in Twig to get formatted output of your form errors.
      * Note that you have to provide form as Form object, not FormView.
      * 
-     * @param \Symfony\Component\Form\Form $form
+     * @param Form $form
      * @param string $tag html tag, in which all errors will be packed. If you will provide 'li', 'ul' wrapper will be added
-     * @param type $class class of each error. Default is none
+     * @param class-string $class class of each error. Default is none
      * @return string
      */
     public function allFormErrors(Form $form, $tag = 'li', $class = '')
@@ -51,8 +52,8 @@ class FormErrorsExtension extends \Twig_Extension
             if ($tag == 'li') {
                 $return.='<ul>';
             }
-
-            foreach ($errorsList as $item) {
+            /** @var array $item */
+	        foreach ($errorsList as $item) {
                 $return.=$this->handleErrors($item, $tag, $class);
             }
 
@@ -66,9 +67,9 @@ class FormErrorsExtension extends \Twig_Extension
 
     /**
      * Handle single error creation
-     * @param type $item
-     * @param type $tag
-     * @param type $class
+     * @param array $item
+     * @param string $tag
+     * @param class-string $class
      * @return string
      */
     private function handleErrors($item, $tag, $class)
